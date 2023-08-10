@@ -2,7 +2,7 @@ SHELL:=/usr/bin/env bash -O globstar
 
 # CI/CD
 clean:
-	cd getway && make clean
+	cd gateway && make clean
 	rm -rf .pytest_cache
 	rm -rf .mypy_cache
 	rm -rf test-results
@@ -12,16 +12,16 @@ clean:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 fix:
-	cd getway && make fix
+	cd gateway && make fix
 
 lint:
-	cd getway && make lint
+	cd gateway && make lint
 
 fix-lint:
-	cd getway && make fix-lint
+	cd gateway && make fix-lint
 
 test:
-	cd getway && make test
+	cd gateway && make test
 
-start-getway:
-	cd getway && make start
+start-gateway:
+	cd gateway && make start

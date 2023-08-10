@@ -40,4 +40,4 @@ test: load-env clean
 	pytest ./tests --junit-xml=test-results/pytest/results.xml
 
 start: load-env
-	python -m uvicorn src.main:app --host=0.0.0.0 --port=${APP_API_PORT} --reload
+	python -m uvicorn src.main:app --host=${GETWAY_HOST} --port=${GETWAY_PORT} --reload
