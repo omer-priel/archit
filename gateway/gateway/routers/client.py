@@ -1,7 +1,6 @@
 
 import strawberry
-from fastapi import APIRouter
-from strawberry.asgi import GraphQL
+from strawberry.fastapi import GraphQLRouter
 
 
 @strawberry.type
@@ -18,4 +17,5 @@ class Query:
 
 
 schema = strawberry.Schema(query=Query)
-router = GraphQL(schema)
+
+router = GraphQLRouter(schema)

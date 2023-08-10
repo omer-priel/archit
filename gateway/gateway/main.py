@@ -1,12 +1,14 @@
 
 from fastapi import FastAPI
 
-from src.routers.client import router as client_router
+from gateway.routers.client import router as client_router
 
 
 app = FastAPI()
 
+# Add routers
 app.add_route("/client", client_router)
+app.add_websocket_route("/client", client_router)
 
 
 @app.get("/")
