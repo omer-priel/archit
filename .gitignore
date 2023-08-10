@@ -1,0 +1,4 @@
+# python
+__pycache__
+.mypy_cache
+test-results

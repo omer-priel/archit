@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "archit"
+version = "0.1.0"
+description = "Project for me to learn about Software Architecture"
+authors = ["Omer Priel <omer.priel2@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.5.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+flake8-isort = "^6.0.0"
+black = "^23.7.0"
+bandit = "^1.7.5"
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
