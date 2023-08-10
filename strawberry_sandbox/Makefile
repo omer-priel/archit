@@ -29,6 +29,6 @@ lint: flake8 black-check mypy
 
 fix-lint: clean fix lint
 
-start:
+start: clean
 	python -m strawberry server strawberry_sandbox.schema
 
