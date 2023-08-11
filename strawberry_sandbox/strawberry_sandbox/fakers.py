@@ -2,13 +2,16 @@
 from typing import Optional
 
 from faker import Faker
-from factory import Factory, Faker as FactoryFaker, LazyAttribute
-
+from factory import Factory, Faker as FactoryFaker, LazyAttribute, SubFactory
 
 from strawberry_sandbox.models import Article, Like, User, Address, UserProfile, UploadedImage, ArticleImage
 
+
 fake = Faker()
 id_fakes = {}
+
+
+PHONE_PREFIXS = ['052', '053', '054', '055', '058']
 
 
 def generate_unique_id(tag: str) -> int:
@@ -50,8 +53,8 @@ class UserProfileFactory(Factory):
         model = UserProfile
 
     user_id = null_id_factory_field()
-    address = AddressFactory.build()
-    phone_number = FactoryFaker('phone_number')
+    address = SubFactory(AddressFactory)
+    phone_number = LazyAttribute(lambda x: fake.random_element(PHONE_PREFIXS) + fake.numerify('-#######'))
     email = FactoryFaker('email')
     age = FactoryFaker('pyint', min_value=18, max_value=100)
     sex = FactoryFaker('pybool')
