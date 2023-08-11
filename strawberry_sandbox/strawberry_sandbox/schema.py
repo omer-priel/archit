@@ -3,7 +3,7 @@ import typing
 import strawberry
 
 
-from strawberry_sandbox.models import User, Article, UserProfile
+from strawberry_sandbox.models import User, Article, UserProfile, UploadedImage, ArticleImage
 from strawberry_sandbox.fakers import generate_pool
 
 
@@ -47,9 +47,19 @@ class UserFullOutput(UserOutput):
 
 
 @strawberry.type
+class ArticleImageOutput:
+    image_id: int
+    file_name: str
+    width: int
+    height: int
+    image_index: int
+
+
+@strawberry.type
 class ArticleFullOutput(ArticleOutput):
     author: UserOutput
     likes: list[UserOutput]
+    images: list[ArticleImageOutput]
 
 
 def safe_user(user: User, user_profile: UserProfile) -> UserOutput:
@@ -103,8 +113,18 @@ def safe_article(article: Article) -> ArticleOutput:
         publication_date=str(article.publication_date)
     )
 
+def safe_article_image(image: UploadedImage, article_image: ArticleImage) -> ArticleImageOutput:
+    return ArticleImageOutput(
+        image_id=image.image_id,
+        file_name=image.file_name,
+        width=image.width,
+        height=image.height,
+        image_index=article_image.image_index
+    )
 
-def safe_full_article(article: Article, author: UserOutput, likes: list[UserOutput]) -> ArticleFullOutput:
+
+def safe_full_article(article: Article, author: UserOutput, likes: list[UserOutput],
+                      images: list[ArticleImageOutput]) -> ArticleFullOutput:
     return ArticleFullOutput(
         article_id=article.article_id,
         author_id=article.author_id,
@@ -113,51 +133,88 @@ def safe_full_article(article: Article, author: UserOutput, likes: list[UserOutp
         publication_date=str(article.publication_date),
         author=author,
         likes=likes,
+        images=images,
     )
 
 
-def get_articles() -> list[ArticleFullOutput]:
-    pool = generate_pool()
-    articles_output = []
+def get_articles(sorted_mode: bool = False):
+    def resolver() -> list[ArticleFullOutput]:
+        pool = generate_pool()
+        articles_output = []
 
-    for article_id in pool.articles:
-        article = pool.articles[article_id]
+        for article_id in pool.articles:
+            article = pool.articles[article_id]
 
-        article_output = safe_full_article(
-            article,
-            author=safe_user(pool.users[article.author_id], pool.users_profile[article.author_id]),
-            likes=[safe_user(pool.users[like.user_id], pool.users_profile[like.user_id]) for like in pool.likes
-                   if like.article_id == article.article_id]
-        )
+            images = [safe_article_image(pool.uploaded_images[article_image.image_id], article_image)
+                      for article_image in pool.articles_images
+                      if article_image.article_id == article.article_id]
 
-        articles_output.append(article_output)
+            if sorted_mode:
+                images.sort(key=lambda image: image.image_index)
 
-    return articles_output
+            article_output = safe_full_article(
+                article,
+                author=safe_user(pool.users[article.author_id], pool.users_profile[article.author_id]),
+                likes=[safe_user(pool.users[like.user_id], pool.users_profile[like.user_id]) for like in pool.likes
+                       if like.article_id == article.article_id],
+                images=images
+            )
+
+            articles_output.append(article_output)
+
+        if sorted_mode:
+            articles_output.sort(key=lambda article: article.article_id)
+
+        return articles_output
+    return resolver
 
 
-def get_users() -> list[UserFullOutput]:
-    pool = generate_pool()
-    users_output = []
-    for user_id in pool.users:
-        user = pool.users[user_id]
+def get_users(sorted_mode: bool = False):
+    def resolver() -> list[UserFullOutput]:
+        pool = generate_pool()
+        users_output = []
+        for user_id in pool.users:
+            user = pool.users[user_id]
 
-        user_output = safe_full_user(
-            user,
-            pool.users_profile[user_id],
-            written_articles=[safe_article(pool.articles[article_id]) for article_id in pool.articles
-                              if pool.articles[article_id].author_id == user_id],
-            liked_articles=[safe_article(pool.articles[like.article_id]) for like in pool.likes if like.user_id == user_id]
-        )
+            written_articles = [safe_article(pool.articles[article_id]) for article_id in pool.articles
+                                if pool.articles[article_id].author_id == user_id]
 
-        users_output.append(user_output)
+            liked_articles = [safe_article(pool.articles[like.article_id]) for like in pool.likes if like.user_id == user_id]
 
-    return users_output
+            if sorted_mode:
+                written_articles.sort(key=lambda article: article.article_id)
+                liked_articles.sort(key=lambda article: article.article_id)
+
+            user_output = safe_full_user(
+                user,
+                pool.users_profile[user_id],
+                written_articles=written_articles,
+                liked_articles=liked_articles,
+            )
+
+            users_output.append(user_output)
+
+        if sorted_mode:
+            users_output.sort(key=lambda user: user.user_id)
+
+        return users_output
+    return resolver
+
+
+@strawberry.type
+class QuerySorted:
+    articles: list[ArticleFullOutput] = strawberry.field(resolver=get_articles(sorted_mode=True))
+    users: list[UserFullOutput] = strawberry.field(resolver=get_users(sorted_mode=True))
 
 
 @strawberry.type
 class Query:
-    articles: list[ArticleFullOutput] = strawberry.field(resolver=get_articles)
-    users: list[UserFullOutput] = strawberry.field(resolver=get_users)
+    @strawberry.field
+    def sorted(self) -> QuerySorted:
+        return QuerySorted()
+
+    articles: list[ArticleFullOutput] = strawberry.field(resolver=get_articles())
+    users: list[UserFullOutput] = strawberry.field(resolver=get_users())
 
 
 schema = strawberry.Schema(query=Query)

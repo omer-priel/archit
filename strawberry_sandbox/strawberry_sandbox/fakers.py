@@ -65,7 +65,7 @@ class UploadedImageFactory(Factory):
         model = UploadedImage
 
     image_id = id_factory_field('uploaded_image')
-    file_name = FactoryFaker('file_name')
+    file_name = LazyAttribute(lambda el: fake.file_name(category='image'))
     width = FactoryFaker('pyint', min_value=100, max_value=1000)
     height = FactoryFaker('pyint', min_value=100, max_value=1000)
 

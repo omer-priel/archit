@@ -31,7 +31,7 @@ class UserProfile:
 
 
 class UploadedImage:
-    def __init__(self, image_id: int, file_name: str, width: int, height) -> None:
+    def __init__(self, image_id: int, file_name: str, width: int, height: int) -> None:
         self.image_id = image_id
         self.file_name = file_name
         self.width = width
