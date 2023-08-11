@@ -8,8 +8,34 @@ class User:
         self.user_id = user_id
         self.name = name
 
-    def __str__(self) -> str:
-        return str(self.user_id)
+
+class Address:
+    def __init__(self, street: str, city: str, country: str, zip_code: str) -> None:
+        self.street = street
+        self.city = city
+        self.country = country
+        self.zip_code = zip_code
+
+
+class UserProfile:
+    def __init__(self, user_id: int, address: Address, phone_number: str, email: str, age: int, sex: bool) -> None:
+        self.user_id = user_id
+        self.address = address
+        self.phone_number = phone_number
+        self.email = email
+        self.age = age
+        self.sex = sex
+
+    def is_male(self) -> bool:
+        return self.sex
+
+
+class UploadedImage:
+    def __init__(self, image_id: int, file_name: str, width: int, height) -> None:
+        self.image_id = image_id
+        self.file_name = file_name
+        self.width = width
+        self.height = height
 
 
 class Article:
@@ -20,14 +46,15 @@ class Article:
         self.content = content
         self.publication_date = publication_date
 
-    def __str__(self) -> str:
-        return str(self.article_id)
-
 
 class Like:
     def __init__(self, article_id: int, user_id: int) -> None:
         self.article_id = article_id
         self.user_id = user_id
 
-    def __str__(self) -> str:
-        return f'{self.user_id} likes {self.article_id}'
+
+class ArticleImage:
+    def __init__(self, article_id: int, image_id: int, image_index: int) -> None:
+        self.article_id = article_id
+        self.image_id = image_id
+        self.image_index = image_index
